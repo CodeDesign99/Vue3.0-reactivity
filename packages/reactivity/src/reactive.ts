@@ -1,4 +1,4 @@
-import { isObject } from '@vue/shared'
+import { isObject, toRawType } from '@vue/shared'
 import {
     mutableHandlers,
     readonlyHandlers,
@@ -38,13 +38,38 @@ function createReactiveObject(target: any, isReadonly: boolean, baseHandler: obj
     }
 
     const proxyMap = isReadonly ? readonlyMap : reactiveMap
-    const existProxy = proxyMap.has(target)
-    if (existProxy) {
-        return reactiveMap.get(target)
+    const existingProxy = proxyMap.get(target)
+    if (existingProxy) {
+        return existingProxy
+    }
+
+    const targetType = getTargetType(target)
+    if (targetType === 0) {
+        return target
     }
 
     const proxy = new Proxy(target, baseHandler)
     proxyMap.set(target, proxy)
 
     return proxy
+}
+
+function targetTypeMap(rawType: string) {
+    switch (rawType) {
+        case 'Object':
+        case 'Array':
+            return 1 /* COMMON */;
+        case 'Map':
+        case 'Set':
+        case 'WeakMap':
+        case 'WeakSet':
+            return 2 /* COLLECTION */;
+        default:
+            return 0 /* INVALID */;
+    }
+}
+function getTargetType(value: any) {
+    return value["__v_skip" /* SKIP */] || !Object.isExtensible(value)
+        ? 0 /* INVALID */
+        : targetTypeMap(toRawType(value));
 }

@@ -23,3 +23,12 @@ export const hasChanged = (value: any, oldValue: any): boolean =>
 export const isArray = Array.isArray
 
 export const extend = Object.assign
+
+export const objectToString = Object.prototype.toString;
+
+export const toTypeString = (value: unknown) => objectToString.call(value);
+
+export const toRawType = (value: unknown) => {
+    // extract "RawType" from strings like "[object RawType]"
+    return toTypeString(value).slice(8, -1);
+};
