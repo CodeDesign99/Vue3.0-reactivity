@@ -1,3 +1,3 @@
-export function foo() {
+export * from './reactive'
 
-}
+export { effect } from './effect'

@@ -29,14 +29,15 @@ const outputConfig = {
     }
 }
 
-function createConfig(format, output) {
+function createConfig(output) {
     output.name = packageOptions.name
     output.sourcemap = true
     return {
         input: resolve('src/index.ts'), // 打包入口
         output,
         plugins: [
-            ts({ // ts 编译的时候用的文件是哪一个
+            ts({
+                // ts 编译的时候用的文件是哪一个
                 tsconfig: path.resolve(__dirname, 'tsconfig.json')
             }),
             resolvePlugin()
@@ -44,4 +45,4 @@ function createConfig(format, output) {
     }
 }
 // 根据用户提供的formats选项 去我们自己的配置里取值进行生成配置文件
-export default packageOptions.formats.map(format => createConfig(format, outputConfig[format]))
+export default packageOptions.formats.map((format) => createConfig(outputConfig[format]))
