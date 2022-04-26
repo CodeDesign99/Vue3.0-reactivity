@@ -1,4 +1,5 @@
 const fs = require('fs')
+// const execa = require('execa')
 const execa = import('execa')
 
 const dirs = fs.readdirSync('packages').filter((p) => {
@@ -9,7 +10,7 @@ const dirs = fs.readdirSync('packages').filter((p) => {
 })
 
 async function build(target) {
-    // await execa('rollup', ['-c', '--environment', `TARGET:${target}`])
+    // await execa('rollup', ['-cw', '--environment', `TARGET:${target}`], { stdio: 'inherit' })
     return new Promise((resolve) => {
         execa.then((module) => {
             module
@@ -25,14 +26,14 @@ async function build(target) {
     })
 }
 
-async function runParallel(dirs, iterFn) {
+async function runParaller(dirs, itemFn) {
     let result = []
 
     for (let item of dirs) {
-        result.push(iterFn(item))
+        result.push(itemFn(item))
     }
 
     return Promise.all(result)
 }
 
-runParallel(dirs, build).then(() => {})
+runParaller(dirs, build).then(() => { })

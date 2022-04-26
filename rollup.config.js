@@ -1,4 +1,5 @@
 import ts from 'rollup-plugin-typescript2' //解析ts插件
+import json from '@rollup/plugin-json'
 import resolvePlugin from '@rollup/plugin-node-resolve' // 解析第三方插件
 import path from 'path'
 
@@ -36,6 +37,7 @@ function createConfig(output) {
         input: resolve('src/index.ts'), // 打包入口
         output,
         plugins: [
+            json(),
             ts({
                 // ts 编译的时候用的文件是哪一个
                 tsconfig: path.resolve(__dirname, 'tsconfig.json')
