@@ -5,6 +5,8 @@ export const isSymbol = (val: unknown): val is symbol => typeof val === 'symbol'
 
 export const isString = (val: unknown): val is string => typeof val === 'string'
 
+export const isFunction = (val: unknown) => typeof val === 'function';
+
 export const isIntegerKey = (key: unknown) =>
   isString(key) &&
   key !== 'NaN' &&
@@ -32,3 +34,5 @@ export const toRawType = (value: unknown) => {
     // extract "RawType" from strings like "[object RawType]"
     return toTypeString(value).slice(8, -1);
 };
+
+export type IfAny<T, Y, N> = 0 extends (1 & T) ? Y : N;

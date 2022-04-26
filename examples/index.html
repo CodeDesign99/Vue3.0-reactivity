@@ -22,63 +22,95 @@
                 </div>
             </div>
         </div>
-        <!-- <script src="./node_modules/@vue/reactivity/dist/reactivity.global.js"></script> -->
+        <script src="./node_modules/@vue/reactivity/dist/reactivity.global.js"></script>
 
-        <script src="../packages/reactivity/dist/reactivity.global.js"></script>
+        <!-- <script src="../packages/reactivity/dist/reactivity.global.js"></script> -->
         <script>
-            let { reactive, shallowReactive, readonly, shallowReadonly, effect, ref } = VueReactivity
-            const len = ref(0),
-                  flag = ref(null),
-                  list = reactive([])
+            let {
+                reactive,
+                shallowReactive,
+                readonly,
+                shallowReadonly,
+                effect,
+                ref,
+                toRef,
+                toRefs,
+                computed
+                } = VueReactivity
+            // const len = ref(0),
+            //       flag = ref(null),
+            //       list = reactive([])
 
-            let bar = app.querySelector('.water'),
-                listDom = app.querySelector('.list')
-            effect(() => {
-                bar.style.width = `${len.value}%`
-                listDom.replaceChild(createList(list), listDom.children[0])
+            const state = reactive({
+                foo: 1,
+                bar: 2
             })
 
-            startBtn.addEventListener('click', startClickBandler)
-            stopBtn.addEventListener('click', stopClickBandler)
-
-            let i = 1,
-                timers = []
-            function startClickBandler(){
-                if(flag.value) return
-                flag.value = true
-                while(timers.length + i <= 100){
-                    const time = timers.length + 1
-                    const temp = timers.length + i
-                    timers.push(
-                        setTimeout(() => {
-                            i++
-                            len.value = temp
-                            list.push(new Date())
-                            timers.shift()
-                        }, 500 * time))
+            const cmp = computed({
+                get:() => {
+                    return state.foo
+                },
+                set:(newValue) => {
+                    state.foo = newValue
                 }
-            }
+            })
 
-            function stopClickBandler(){
-                flag.value = false
-                timers.forEach(id => clearTimeout(id))
-                timers.length = 0
-            }
+            effect(function aaaaaaaaa(){
+                console.log(cmp.value)
+            })
 
-            function createList(list){
-                const items = document.createDocumentFragment()
-                for(let i = 0; i < list.length; i++){
-                    let div = document.createElement('div')
-                    let className = i % 2 === 0 ? 'even' : 'odd'
-                    div.classList.add('item', className)
-                    div.innerText = list[i]
-                    items.appendChild(div)
-                }
-                let listDom = document.createElement('div')
-                listDom.classList.add('children')
-                listDom.appendChild(items)
-                return listDom
-            }
+            document.addEventListener('click', () => {
+                cmp.value += 10
+            })
+
+            // let bar = app.querySelector('.water'),
+            //     listDom = app.querySelector('.list')
+            // effect(() => {
+            //     bar.style.width = `${len.value}%`
+            //     listDom.replaceChild(createList(list), listDom.children[0])
+            // })
+
+            // startBtn.addEventListener('click', startClickBandler)
+            // stopBtn.addEventListener('click', stopClickBandler)
+
+            // let i = 1,
+            //     timers = []
+            // function startClickBandler(){
+            //     if(flag.value) return
+            //     flag.value = true
+            //     while(timers.length + i <= 100){
+            //         const time = timers.length + 1
+            //         const temp = timers.length + i
+            //         timers.push(
+            //             setTimeout(() => {
+            //                 i++
+            //                 len.value = temp
+            //                 list.push(new Date())
+            //                 timers.shift()
+            //             }, 500 * time))
+            //     }
+            // }
+
+            // function stopClickBandler(){
+            //     flag.value = false
+            //     timers.forEach(id => clearTimeout(id))
+            //     timers.length = 0
+            // }
+
+            // function createList(list){
+            //     const items = document.createDocumentFragment()
+            //     for(let i = 0; i < list.length; i++){
+            //         let div = document.createElement('div')
+            //         let className = i % 2 === 0 ? 'even' : 'odd'
+            //         div.classList.add('item', className)
+            //         div.innerText = list[i]
+            //         items.appendChild(div)
+            //     }
+            //     let listDom = document.createElement('div')
+            //     listDom.classList.add('children')
+            //     listDom.appendChild(items)
+            //     return listDom
+            // }
 
         </script>
     </body>

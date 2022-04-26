@@ -1,12 +1,13 @@
 import { isObject, extend, isArray, isIntegerKey, hasOwn, hasChanged } from "@vue/shared"
 import { track, trigger } from "./effect"
 import { reactive, readonly } from "./reactive"
+import { TrackOpTypes, TriggerOpTypes } from './operations'
 
 function createGetter(isReadonly = false, shallow = false) {
     return function get(target: any, key: string | symbol, receiver: object) {
         const res = Reflect.get(target, key, receiver)
         if (!isReadonly) { // 收集依赖
-            track(target, 'get', key)
+            track(target, TrackOpTypes.GET, key)
         }
         if (shallow) {
             return res
@@ -30,9 +31,9 @@ function createSetter(shallow = false) {
         const result = Reflect.set(target, key, value, receiver)
 
         if (!hadKey) {
-            trigger(target, 'add', key, value)
+            trigger(target, TriggerOpTypes.ADD, key, value)
         } else if (hasChanged(oldValue, value)) {
-            trigger(target, 'set', key, value, oldValue)
+            trigger(target, TriggerOpTypes.SET, key, value, oldValue)
         }
         return result
     }
