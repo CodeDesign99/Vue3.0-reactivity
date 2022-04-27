@@ -1,12 +1,15 @@
 import { isArray, isIntegerKey } from "@vue/shared"
 import { TriggerOpTypes } from './operations'
 
+export type optionsType = {
+    lazy: boolean;
+    scheduler: Function
+}
 export type effectType<T> = {
     (): T;
-    id: number;
     __isEffect: boolean;
-    __isComputed: boolean;
-    options: any;
+    options: optionsType;
+    deps: Set<effectType<T>>[]
 }
 
 export function effect<T = any>(fn: () => T, options: any = {}): effectType<T> {
@@ -22,27 +25,28 @@ export function effect<T = any>(fn: () => T, options: any = {}): effectType<T> {
 
 const effectStack: any[] = []
 export let activeEffect: effectType<any>
-let id = 0
 function cerateReactiveEffect<T = any>(fn: () => T, options: any = {}) {
     const effect = function reactiveEffect() {
-        try {
-            if (!effect.__isComputed) {
-                effectStack.push(effect)
-                activeEffect = effect
-            }
-            return fn()
-        } finally {
-            effectStack.pop()
-            activeEffect = effectStack.at(-1)
-        }
+        cleanup(effect)
+        activeEffect = effect
+        effectStack.push(effect)
+        const res = fn()
+        effectStack.pop()
+        activeEffect = effectStack.at(-1)
+        return res
     }
-    effect.id = id++
     effect.__isEffect = true
-    effect.__isComputed = !!options.__isComputed
     effect.options = options
-    effect.raw = fn
-    effect.deps = [] as any[]
+    effect.deps = [] as Set<effectType<T>>[]
     return effect
+}
+
+function cleanup(effect: effectType<any>) {
+    for (let i = 0; i < effect.deps.length; i++) {
+        const deps = effect.deps[i]
+        deps.delete(effect)
+    }
+    effect.deps.length = 0
 }
 
 const targetMap = new WeakMap<object, Map<any, Set<effectType<any>>>>()
@@ -59,6 +63,7 @@ export function track(target: object, type: string, key: unknown) {
         if (!dep.has(activeEffect)) {
             dep.add(activeEffect)
         }
+        activeEffect.deps.push(dep)
     }
 }
 
@@ -70,7 +75,11 @@ export function trigger(target: object, type: string, key?: unknown, newValue?: 
     const effectsSet = new Set<effectType<any>>()
     const add = (effects: Set<effectType<any>> | undefined) => {
         if (effects) {
-            effects.forEach(effect => effectsSet.add(effect))
+            effects.forEach(effect => {
+                if (effect !== activeEffect) {
+                    effectsSet.add(effect)
+                }
+            })
         }
     }
 
@@ -91,9 +100,10 @@ export function trigger(target: object, type: string, key?: unknown, newValue?: 
     }
 
     effectsSet.forEach(effect => {
-        if (effect.options.sch) {
-            effect.options.sch()
+        if (effect.options.scheduler) {
+            effect.options.scheduler(effect)
+        } else {
+            effect()
         }
-        effect()
     })
 }

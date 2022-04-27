@@ -22,9 +22,9 @@
                 </div>
             </div>
         </div>
-        <script src="./node_modules/@vue/reactivity/dist/reactivity.global.js"></script>
+        <!-- <script src="./node_modules/@vue/reactivity/dist/reactivity.global.js"></script> -->
 
-        <!-- <script src="../packages/reactivity/dist/reactivity.global.js"></script> -->
+        <script src="../packages/reactivity/dist/reactivity.global.js"></script>
         <script>
             let {
                 reactive,
@@ -41,17 +41,14 @@
             //       flag = ref(null),
             //       list = reactive([])
 
-            const state = reactive({
-                foo: 1,
-                bar: 2
-            })
+            const state = ref(0)
 
             const cmp = computed({
                 get:() => {
-                    return state.foo
+                    return state.value
                 },
                 set:(newValue) => {
-                    state.foo = newValue
+                    state.value = newValue
                 }
             })
 
@@ -60,7 +57,7 @@
             })
 
             document.addEventListener('click', () => {
-                cmp.value += 10
+                cmp.value = cmp.value
             })
 
             // let bar = app.querySelector('.water'),

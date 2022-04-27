@@ -1,5 +1,6 @@
 import { isFunction } from "@vue/shared";
-import { effect, effectType } from "./effect";
+import { effect, effectType, track, trigger } from "./effect";
+import { TrackOpTypes, TriggerOpTypes } from "./operations";
 
 export type ComputedGetter<T> = (...args: any[]) => T
 export type ComputedSetter<T> = (v: T) => void
@@ -14,12 +15,12 @@ class ComputedRefImpl<T> {
     constructor(getter: ComputedGetter<T>,private readonly _setter: ComputedSetter<T>) {
         this.effect = effect(getter, {
             lazy: true,
-            sch: () => {
+            scheduler: () => {
                 if (!this._dirty) {
                     this._dirty = true
                 }
-            },
-            __isComputed: true
+                trigger(this, TriggerOpTypes.SET, 'value')
+            }
         })
     }
 
@@ -28,6 +29,7 @@ class ComputedRefImpl<T> {
             this._value = this.effect()
             this._dirty = false
         }
+        track(this, TrackOpTypes.GET, 'value')
         return this._value
     }
 
