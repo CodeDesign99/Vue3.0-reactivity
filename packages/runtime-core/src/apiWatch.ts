@@ -15,7 +15,11 @@ export function watch(source: any, cb: WatchCallback, options: any): WatchStopHa
     return doWatch(source, cb, options)
 }
 
-function doWatch(source: any, cb: WatchCallback, options: any): WatchStopHandle {
+export function watchEffect(source: any){
+    doWatch(source)
+}
+
+function doWatch(source: any, cb?: WatchCallback, options?: any): WatchStopHandle {
     let getter: () => any
     if (isFunction(source)) {
         getter = source
@@ -32,12 +36,16 @@ function doWatch(source: any, cb: WatchCallback, options: any): WatchStopHandle 
     }
 
     const job = () => {
-        newValue = effectFn()
-        if (cleanup) {
-            cleanup()
+        if (cb) {
+            newValue = effectFn()
+            if (cleanup) {
+                cleanup()
+            }
+            cb(newValue, oldValue, onInvalidate)
+            oldValue = newValue
+        } else {
+            source()
         }
-        cb(newValue, oldValue, onInvalidate)
-        oldValue = newValue
     }
 
     const effectFn = effect(() => getter(), {

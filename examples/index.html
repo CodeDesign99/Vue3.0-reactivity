@@ -41,9 +41,9 @@
                 watch,
                 watchEffect
             } = VueRuntimeCore
-            // const len = ref(0),
-            //       flag = ref(null),
-            //       list = reactive([])
+            const len = ref(0),
+                  flag = ref(null),
+                  list = reactive([])
 
             const state = ref(0),
                   watchValue = reactive({a:{b:{c:1}}})
@@ -57,73 +57,75 @@
                 }
             )
 
-            // const cmp = computed({
-            //     get:() => {
-            //         return state.value
-            //     },
-            //     set:(newValue) => {
-            //         state.value = newValue
-            //     }
-            // })
+            watchEffect(() => console.log(watchValue.a.b.c))
 
-            // effect(() => {
-            //     console.log(cmp.value)
-            // })
+            const cmp = computed({
+                get:() => {
+                    return state.value
+                },
+                set:(newValue) => {
+                    state.value = newValue
+                }
+            })
+
+            effect(() => {
+                console.log(cmp.value)
+            })
 
             document.addEventListener('click', () => {
-                // cmp.value = cmp.value
+                cmp.value++
                 watchValue.a.b.c++
                 stop()
             })
 
-            // let bar = app.querySelector('.water'),
-            //     listDom = app.querySelector('.list')
-            // effect(() => {
-            //     bar.style.width = `${len.value}%`
-            //     listDom.replaceChild(createList(list), listDom.children[0])
-            // })
+            let bar = app.querySelector('.water'),
+                listDom = app.querySelector('.list')
+            effect(() => {
+                bar.style.width = `${len.value}%`
+                listDom.replaceChild(createList(list), listDom.children[0])
+            })
 
-            // startBtn.addEventListener('click', startClickBandler)
-            // stopBtn.addEventListener('click', stopClickBandler)
+            startBtn.addEventListener('click', startClickBandler)
+            stopBtn.addEventListener('click', stopClickBandler)
 
-            // let i = 1,
-            //     timers = []
-            // function startClickBandler(){
-            //     if(flag.value) return
-            //     flag.value = true
-            //     while(timers.length + i <= 100){
-            //         const time = timers.length + 1
-            //         const temp = timers.length + i
-            //         timers.push(
-            //             setTimeout(() => {
-            //                 i++
-            //                 len.value = temp
-            //                 list.push(new Date())
-            //                 timers.shift()
-            //             }, 500 * time))
-            //     }
-            // }
+            let i = 1,
+                timers = []
+            function startClickBandler(){
+                if(flag.value) return
+                flag.value = true
+                while(timers.length + i <= 100){
+                    const time = timers.length + 1
+                    const temp = timers.length + i
+                    timers.push(
+                        setTimeout(() => {
+                            i++
+                            len.value = temp
+                            list.push(new Date())
+                            timers.shift()
+                        }, 500 * time))
+                }
+            }
 
-            // function stopClickBandler(){
-            //     flag.value = false
-            //     timers.forEach(id => clearTimeout(id))
-            //     timers.length = 0
-            // }
+            function stopClickBandler(){
+                flag.value = false
+                timers.forEach(id => clearTimeout(id))
+                timers.length = 0
+            }
 
-            // function createList(list){
-            //     const items = document.createDocumentFragment()
-            //     for(let i = 0; i < list.length; i++){
-            //         let div = document.createElement('div')
-            //         let className = i % 2 === 0 ? 'even' : 'odd'
-            //         div.classList.add('item', className)
-            //         div.innerText = list[i]
-            //         items.appendChild(div)
-            //     }
-            //     let listDom = document.createElement('div')
-            //     listDom.classList.add('children')
-            //     listDom.appendChild(items)
-            //     return listDom
-            // }
+            function createList(list){
+                const items = document.createDocumentFragment()
+                for(let i = 0; i < list.length; i++){
+                    let div = document.createElement('div')
+                    let className = i % 2 === 0 ? 'even' : 'odd'
+                    div.classList.add('item', className)
+                    div.innerText = list[i]
+                    items.appendChild(div)
+                }
+                let listDom = document.createElement('div')
+                listDom.classList.add('children')
+                listDom.appendChild(items)
+                return listDom
+            }
 
         </script>
     </body>
