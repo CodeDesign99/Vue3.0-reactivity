@@ -24,13 +24,12 @@
         </div>
         <!-- <script src="./node_modules/@vue/reactivity/dist/reactivity.global.js"></script> -->
 
-        <script src="../packages/reactivity/dist/reactivity.global.js"></script>
-        <script src="../packages/runtime-dom/dist/runtime-dom.global.js"></script>
+        <!-- <script src="../packages/reactivity/dist/reactivity.global.js"></script>
+        <script src="../packages/runtime-dom/dist/runtime-dom.global.js"></script> -->
+        <script src="../packages/runtime-core/dist/runtime-core.global.js"></script>
         <script>
 
-            console.log(VueRuntimeDom)
-            let {
-                reactive,
+            let { reactive,
                 shallowReactive,
                 readonly,
                 shallowReadonly,
@@ -38,29 +37,43 @@
                 ref,
                 toRef,
                 toRefs,
-                computed
-                } = VueReactivity
+                computed,
+                watch,
+                watchEffect
+            } = VueRuntimeCore
             // const len = ref(0),
             //       flag = ref(null),
             //       list = reactive([])
 
-            const state = ref(0)
+            const state = ref(0),
+                  watchValue = reactive({a:{b:{c:1}}})
 
-            const cmp = computed({
-                get:() => {
-                    return state.value
-                },
-                set:(newValue) => {
-                    state.value = newValue
+            const stop = watch(
+                watchValue,
+                (newValue, oldValue) => {
+                    console.log(newValue, oldValue)
+                },{
+                    immediate:true
                 }
-            })
+            )
 
-            effect(function aaaaaaaaa(){
-                console.log(cmp.value)
-            })
+            // const cmp = computed({
+            //     get:() => {
+            //         return state.value
+            //     },
+            //     set:(newValue) => {
+            //         state.value = newValue
+            //     }
+            // })
+
+            // effect(() => {
+            //     console.log(cmp.value)
+            // })
 
             document.addEventListener('click', () => {
-                cmp.value = cmp.value
+                // cmp.value = cmp.value
+                watchValue.a.b.c++
+                stop()
             })
 
             // let bar = app.querySelector('.water'),

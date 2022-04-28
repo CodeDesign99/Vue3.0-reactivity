@@ -9,7 +9,8 @@ export type effectType<T> = {
     (): T;
     __isEffect: boolean;
     options: optionsType;
-    deps: Set<effectType<T>>[]
+    deps: Set<effectType<T>>[];
+    stop: () => void
 }
 
 export function effect<T = any>(fn: () => T, options: any = {}): effectType<T> {
@@ -38,6 +39,7 @@ function cerateReactiveEffect<T = any>(fn: () => T, options: any = {}) {
     effect.__isEffect = true
     effect.options = options
     effect.deps = [] as Set<effectType<T>>[]
+    effect.stop = () => { }
     return effect
 }
 
@@ -64,6 +66,10 @@ export function track(target: object, type: string, key: unknown) {
             dep.add(activeEffect)
         }
         activeEffect.deps.push(dep)
+        const effect = activeEffect
+        activeEffect.stop = () => {
+            dep?.delete(effect)
+        }
     }
 }
 

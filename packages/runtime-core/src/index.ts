@@ -1,3 +1,3 @@
-export function runtimeCore() {
+export * from '@vue/reactivity'
 
-}
+export { watch } from './apiWatch'
