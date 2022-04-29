@@ -117,3 +117,7 @@ function createReactiveObject(target: Target, isReadonly: boolean, baseHandler: 
 
     return proxy
 }
+
+export function toRaw<T>(observed: T): T {
+    return observed && (observed as Target)[ReactiveFlags.RAW]
+}

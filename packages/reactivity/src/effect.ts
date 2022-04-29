@@ -1,4 +1,4 @@
-import { isArray, isIntegerKey } from "@vue/shared"
+import { isArray, isIntegerKey, isMap } from "@vue/shared"
 import { TriggerOpTypes } from './operations'
 
 export type optionsType = {
@@ -13,6 +13,9 @@ export type effectType<T> = {
     stop: () => void
 }
 
+export const ITERATE_KEY = Symbol('iterate')
+export const MAP_KEY_ITERATE_KEY = Symbol('Map key iterate')
+
 export function effect<T = any>(fn: () => T, options: any = {}): effectType<T> {
     const effect = cerateReactiveEffect(fn, options)
 
@@ -23,6 +26,23 @@ export function effect<T = any>(fn: () => T, options: any = {}): effectType<T> {
     return effect
 }
 
+export let shouldTrack = true
+const trackStack: boolean[] = []
+
+export function pauseTracking() {
+    trackStack.push(shouldTrack)
+    shouldTrack = false
+}
+
+export function enableTracking() {
+    trackStack.push(shouldTrack)
+    shouldTrack = true
+}
+
+export function resetTracking() {
+    const last = trackStack.pop()
+    shouldTrack = last === undefined ? true : last
+}
 
 const effectStack: any[] = []
 export let activeEffect: effectType<any>
@@ -53,7 +73,7 @@ function cleanup(effect: effectType<any>) {
 
 const targetMap = new WeakMap<object, Map<any, Set<effectType<any>>>>()
 export function track(target: object, type: string, key: unknown) {
-    if (activeEffect !== undefined) {
+    if (shouldTrack && activeEffect) {
         let depsMap = targetMap.get(target)
         if (!depsMap) {
             targetMap.set(target, (depsMap = new Map()))
@@ -99,9 +119,29 @@ export function trigger(target: object, type: string, key?: unknown, newValue?: 
         add(depsMap.get(key))
         switch (type) {
             case TriggerOpTypes.ADD:
-                if (isArray(target) && isIntegerKey(key)) {
+                if (!isArray(target)) {
+                    add(depsMap.get(ITERATE_KEY))
+                    if (isMap(target)) {
+                        add(depsMap.get(MAP_KEY_ITERATE_KEY))
+                    }
+                } else if (isIntegerKey(key)) {
+                    // new index added to array -> length changes
                     add(depsMap.get('length'))
                 }
+                break
+            case TriggerOpTypes.DELETE:
+                if (!isArray(target)) {
+                    add(depsMap.get(ITERATE_KEY))
+                    if (isMap(target)) {
+                        add(depsMap.get(MAP_KEY_ITERATE_KEY))
+                    }
+                }
+                break
+            case TriggerOpTypes.SET:
+                if (isMap(target)) {
+                    add(depsMap.get(ITERATE_KEY))
+                }
+                break
         }
     }
 

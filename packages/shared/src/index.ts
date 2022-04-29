@@ -9,6 +9,9 @@ export const isString = (val: unknown): val is string => typeof val === 'string'
 
 export const isFunction = (val: unknown) => typeof val === 'function';
 
+export const isMap = (val: unknown): val is Map<any, any> =>
+    toTypeString(val) === '[object Map]'
+
 const onRE = /^on[^a-z]/
 export const isOn = (key: string) => onRE.test(key)
 
